@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentasi SIPATUH - Alur Bisnis & Fitur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f2e25 0%, #1c5a4a 100%);
+            color: white;
+            padding: 2rem 2.5rem;
+            border-bottom: 4px solid #e67e22;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .header .sub {
+            margin-top: 0.3rem;
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .header .meta {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Content */
+        .content {
+            padding: 2rem 2.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e9edf2;
+            padding-bottom: 1.8rem;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0f2e25;
+            border-left: 4px solid #e67e22;
+            padding-left: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.2rem 1.5rem;
+        }
+
+        .card h4 {
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .card ul {
+            margin-left: 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .flow-item {
+            background: #f1f5f9;
+            padding: 0.6rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-bottom: 3px solid #cbd5e1;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .badge-yellow {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .badge-purple {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 0.6rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
+        .example-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 1rem 2.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 700px) {
+            .header { padding: 1.5rem; }
+            .content { padding: 1.2rem; }
+            .flow-item { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>📋 SIPATUH</h1>
+        <div class="sub">Sistem Informasi Pencatatan Aktivitas Terpadu Harian</div>
+        <div class="meta">Versi 2.0 &bull; Laravel 13 &bull; 2026</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- 1. Pendahuluan -->
+        <div class="section">
+            <div class="section-title">1. Pendahuluan</div>
+            <p>SIPATUH adalah aplikasi pencatatan aktivitas harian karyawan yang memisahkan <strong>aktivitas rutin</strong> dan <strong>aktivitas proyek</strong>. Aplikasi ini memungkinkan:</p>
+            <ul style="margin: 0.5rem 0 0 1.2rem;">
+                <li>User mencatat aktivitas harian (status + detail)</li>
+                <li>User mengusulkan aktivitas baru → atasan approve/reject</li>
+                <li>Atasan menilai KPI bawahan dengan bobot pekerjaan</li>
+                <li>Admin mengelola master data & seluruh sistem</li>
+            </ul>
+        </div>
+
+        <!-- 2. Jenis Aktivitas -->
+        <div class="section">
+            <div class="section-title">2. Jenis Aktivitas</div>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>🔄 Aktivitas Rutin</h4>
+                    <ul>
+                        <li><strong>Daily</strong> – setiap hari</li>
+                        <li><strong>Weekly</strong> – hari tertentu setiap minggu</li>
+                        <li><strong>Monthly</strong> – tanggal tertentu setiap bulan</li>
+                    </ul>
+                    <div style="margin-top:0.4rem;"><span class="badge badge-blue">Contoh: Rekonsiliasi Bank</span></div>
+                </div>
+                <div class="card">
+                    <h4>🚀 Aktivitas Proyek</h4>
+                    <ul>
+                        <li><strong>Tanggal Mulai</strong> – kapan dikerjakan</li>
+                        <li><strong>Tanggal Berakhir</strong> – deadline</li>
+                        <li><strong>Tanggal Selesai</strong> – realisasi</li>
+                    </ul>
+                    <div style="margin-top:0.4rem;"><span class="badge badge-blue">Contoh: Hitung SketchUp, BOQ/BOM</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Alur Bisnis -->
+        <div class="section">
+            <div class="section-title">3. Alur Bisnis Utama</div>
+            <div class="flow">
+                <span class="flow-item">1️⃣ Setup Master</span>
+                <span class="flow-item">2️⃣ Usulkan Aktivitas</span>
+                <span class="flow-item">3️⃣ Approve/Reject</span>
+                <span class="flow-item">4️⃣ Catat Harian</span>
+                <span class="flow-item">5️⃣ Hitung KPI</span>
+                <span class="flow-item">6️⃣ Laporan</span>
+            </div>
+            <ul style="margin-left:1.2rem; font-size:0.9rem;">
+                <li><strong>Usulan:</strong> User buat usulan → status <span class="badge badge-yellow">pending</span> → notif atasan → atasan approve/reject → jika approve, aktivitas muncul di dashboard.</li>
+                <li><strong>Pencatatan:</strong> User pilih status (Belum/Progress/Selesai) + detail → simpan.</li>
+                <li><strong>Penilaian KPI:</strong> Atasan pilih bulan → sistem hitung otomatis → atasan simpan nilai akhir.</li>
+            </ul>
+        </div>
+
+        <!-- 4. Rumus KPI & Contoh -->
+        <div class="section">
+            <div class="section-title">4. Rumus KPI &amp; Grade</div>
+            <div style="background:#eef2ff; padding:0.8rem; border-radius:12px; text-align:center; font-weight:600; font-size:0.95rem; border:1px solid #cbdff2; margin:0.5rem 0;">
+                Nilai KPI = ( Σ (Bobot × Nilai Status) ) / ( Σ Bobot Maksimal ) × 100
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin:0.5rem 0;">
+                <span class="badge badge-green">Selesai = 1.0</span>
+                <span class="badge badge-yellow">Progress = 0.5</span>
+                <span class="badge badge-red">Belum = 0</span>
+            </div>
+
+            <div class="example-box">
+                <p style="font-weight:600; margin-bottom:0.3rem;">📊 Contoh Perhitungan KPI</p>
+                <p style="font-size:0.9rem;">Aisyah (Finance) di bulan Juni memiliki aktivitas:</p>
+                <table style="margin:0.3rem 0;">
+                    <thead>
+                        <tr><th>Aktivitas</th><th>Bobot</th><th>Status</th><th>Skor</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Rekonsiliasi Bank</td><td>30</td><td>Selesai (1.0)</td><td>30</td></tr>
+                        <tr><td>Laporan Keuangan</td><td>40</td><td>Progress (0.5)</td><td>20</td></tr>
+                        <tr><td>Penanganan Pajak</td><td>30</td><td>Selesai (1.0)</td><td>30</td></tr>
+                        <tr style="background:#f8fafc; font-weight:600;">
+                            <td>Total</td><td>100</td><td></td><td>80</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:0.9rem; font-weight:600;">Nilai Akhir = 80 → <span class="badge badge-blue">Grade B (Baik)</span></p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr><th>Grade</th><th>Nilai</th><th>Keterangan</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="badge badge-green">A</span></td><td>≥ 85</td><td>Sangat Baik</td></tr>
+                    <tr><td><span class="badge badge-blue">B</span></td><td>70 – 84</td><td>Baik</td></tr>
+                    <tr><td><span class="badge badge-yellow">C</span></td><td>55 – 69</td><td>Cukup</td></tr>
+                    <tr><td><span class="badge badge-red">D</span></td><td>&lt; 55</td><td>Kurang</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 5. Fitur Aplikasi -->
+        <div class="section">
+            <div class="section-title">5. Fitur Aplikasi</div>
+            <div class="grid-2">
+                <div class="card"><h4>📝 Pencatatan Harian</h4><ul><li>Aktivitas muncul sesuai jadwal</li><li>Status + catatan detail</li><li>Simpan sekali</li></ul></div>
+                <div class="card"><h4>➕ Usulan &amp; Approval</h4><ul><li>User usulkan aktivitas</li><li>Notifikasi ke atasan</li><li>Approve/reject langsung</li></ul></div>
+                <div class="card"><h4>📊 KPI &amp; Laporan</h4><ul><li>Hitung otomatis + grade</li><li>Laporan per bulan</li><li>Atasan bisa nilai &amp; catatan</li></ul></div>
+                <div class="card"><h4>🔐 Hak Akses</h4><ul><li>Staff, Atasan, Admin</li><li>Admin kelola master</li><li>Export Excel</li></ul></div>
+            </div>
+            <div style="margin-top:0.5rem; font-size:0.9rem;">
+                <span class="badge badge-blue">📜 Riwayat Aktivitas</span>
+                <span class="badge badge-blue">🔔 Notifikasi Real-time</span>
+                <span class="badge badge-blue">🎯 Assign Tugas</span>
+                <span class="badge badge-blue">📋 Kelola Master</span>
+            </div>
+        </div>
+
+        <!-- 6. Hak Akses -->
+        <div class="section">
+            <div class="section-title">6. Hak Akses</div>
+            <table>
+                <thead><tr><th>Aksi</th><th>Staff</th><th>Atasan</th><th>Admin</th></tr></thead>
+                <tbody>
+                    <tr><td>Catat aktivitas sendiri</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td>Lihat KPI sendiri</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                    <tr><td>Lihat KPI bawahan</td><td>❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td>Nilai KPI bawahan</td><td>❌</td><td>✅</td><td>❌</td></tr>
+                    <tr><td>Lihat semua KPI</td><td>❌</td><td>❌</td><td>✅</td></tr>
+                    <tr><td>Kelola master aktivitas</td><td>❌</td><td>✅ (dept sendiri)</td><td>✅ (semua)</td></tr>
+                    <tr><td>Assign tugas</td><td>❌</td><td>✅ (bawahan)</td><td>✅ (semua)</td></tr>
+                    <tr><td>Lihat riwayat bawahan</td><td>❌</td><td>✅</td><td>✅</td></tr>
+                </tbody>
+            </table>
+            <div style="margin-top:0.5rem; font-size:0.85rem; background:#f8fafc; padding:0.6rem 1rem; border-radius:10px;">
+                🔒 <strong>Privasi:</strong> KPI hanya bisa dilihat oleh diri sendiri, atasan langsung, dan admin.
+            </div>
+        </div>
+
+        <!-- 7. Teknologi -->
+        <div class="section">
+            <div class="section-title">7. Teknologi</div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+                <span class="badge badge-blue">Laravel 13</span>
+                <span class="badge badge-blue">PHP 8.3</span>
+                <span class="badge badge-blue">MySQL</span>
+                <span class="badge badge-blue">Nginx</span>
+                <span class="badge badge-blue">Bootstrap 5</span>
+            </div>
+        </div>
+
+        <!-- 8. Kesimpulan -->
+        <div class="section">
+            <div class="section-title">8. Kesimpulan</div>
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:1rem;">
+                <p style="font-weight:600; margin-bottom:0.3rem;">✅ SIPATUH siap digunakan</p>
+                <ul style="margin-left:1.2rem; font-size:0.9rem;">
+                    <li>Pencatatan rutin &amp; proyek</li>
+                    <li>Usulan &amp; approval</li>
+                    <li>Assign tugas oleh atasan/admin</li>
+                    <li>KPI otomatis + grade</li>
+                    <li>Laporan, riwayat, notifikasi</li>
+                    <li>Export Excel</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        SIPATUH — Sistem Informasi Pencatatan Aktivitas Terpadu Harian &bull; © 2026
+    </div>
+
+</div>
+</body>
+</html>
