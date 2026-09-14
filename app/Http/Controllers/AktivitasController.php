@@ -188,61 +188,77 @@ class AktivitasController extends Controller
         $atasan = Auth::user();
         $bulan = (int) $request->get('bulan', date('m'));
         $tahun = (int) $request->get('tahun', date('Y'));
-        $userId = $request->get('user_id', ''); // Ganti 'user' jadi 'user_id'
+        $userId = $request->get('user_id', '');
         $status = $request->get('status', '');
         $jenis = $request->get('jenis', '');
-        
+        $search = $request->get('search', ''); // ← TAMBAHAN
+
         // Ambil daftar bawahan untuk dropdown
         $bawahanList = User::where('departemen_id', $atasan->departemen_id)
             ->where('id', '!=', $atasan->id)
             ->orderBy('name')
             ->get();
-        
+
         // Ambil bawahan (satu departemen) - untuk query riwayat
         $bawahanQuery = User::where('departemen_id', $atasan->departemen_id)
             ->where('id', '!=', $atasan->id);
-        
+
         if (!empty($userId)) {
             $bawahanQuery = $bawahanQuery->where('id', $userId);
         }
-        
+
         $bawahanIds = $bawahanQuery->pluck('id');
-        
+
         // Ambil log aktivitas bawahan
         $query = LogAktivitasHarian::whereIn('user_id', $bawahanIds)
             ->whereYear('tanggal', $tahun)
             ->whereMonth('tanggal', $bulan)
-            ->with(['user', 'user.departemen']);
-        
+            ->with(['user', 'user.departemen', 'aktivitasRutin', 'proyek']); // ← tambah eager load
+
         // Filter status
         if (!empty($status)) {
             $query->where('status', $status);
         }
-        
+
         // Filter jenis
         if ($jenis == 'rutin') {
             $query->whereNotNull('aktivitas_rutin_id');
         } elseif ($jenis == 'proyek') {
             $query->whereNotNull('proyek_id');
         }
-        
+
+        // ← TAMBAHAN: Filter pencarian nama rutin / proyek
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('aktivitasRutin', function ($sub) use ($search) {
+                    $sub->where('nama_aktivitas', 'like', '%' . $search . '%');
+                })->orWhereHas('proyek', function ($sub) use ($search) {
+                    $sub->where('nama_proyek', 'like', '%' . $search . '%');
+                });
+            });
+        }
+
         $riwayat = $query->orderBy('tanggal', 'desc')
-            ->paginate(20);
-        
+            ->paginate(20)
+            ->appends($request->query()); // ← agar pagination bawa semua filter
+
         $daftarBulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
         $daftarTahun = range(date('Y') - 1, date('Y'));
-        
+
         $statusList = [
             'belum' => 'Belum Mulai',
             'progress' => 'On Progress',
             'selesai' => 'Selesai'
         ];
-        
-        return view('riwayat_bawahan', compact('riwayat', 'bulan', 'tahun', 'daftarBulan', 'daftarTahun', 'userId', 'status', 'jenis', 'statusList', 'bawahanList'));
+
+        return view('riwayat_bawahan', compact(
+            'riwayat', 'bulan', 'tahun', 'daftarBulan', 'daftarTahun',
+            'userId', 'status', 'jenis', 'statusList', 'bawahanList', 'search'
+        ));
     }
 
     /**
@@ -252,48 +268,61 @@ class AktivitasController extends Controller
     {
         $bulan = (int) $request->get('bulan', date('m'));
         $tahun = (int) $request->get('tahun', date('Y'));
-        $userId = $request->get('user_id', ''); // Ganti 'user' jadi 'user_id'
+        $userId = $request->get('user_id', '');
         $departemenId = $request->get('departemen_id', '');
         $status = $request->get('status', '');
         $jenis = $request->get('jenis', '');
-        
+        $search = $request->get('search', ''); // ← TAMBAHAN
+
         // Ambil daftar user untuk dropdown
         $userList = User::with('departemen')
             ->orderBy('name')
             ->get();
-        
+
         // Query riwayat
         $query = LogAktivitasHarian::whereYear('tanggal', $tahun)
             ->whereMonth('tanggal', $bulan)
-            ->with(['user', 'user.departemen']);
-        
+            ->with(['user', 'user.departemen', 'aktivitasRutin', 'proyek']); // ← tambah eager load
+
         // Filter user
         if (!empty($userId)) {
             $query->where('user_id', $userId);
         }
-        
+
         // Filter departemen
         if (!empty($departemenId)) {
-            $query->whereHas('user', function($q) use ($departemenId) {
+            $query->whereHas('user', function ($q) use ($departemenId) {
                 $q->where('departemen_id', $departemenId);
             });
         }
-        
+
         // Filter status
         if (!empty($status)) {
             $query->where('status', $status);
         }
-        
+
         // Filter jenis
         if ($jenis == 'rutin') {
             $query->whereNotNull('aktivitas_rutin_id');
         } elseif ($jenis == 'proyek') {
             $query->whereNotNull('proyek_id');
         }
-        
+
+        // ← TAMBAHAN: Filter pencarian nama rutin / proyek
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('aktivitasRutin', function ($sub) use ($search) {
+                    $sub->where('nama_aktivitas', 'like', '%' . $search . '%');
+                })->orWhereHas('proyek', function ($sub) use ($search) {
+                    $sub->where('nama_proyek', 'like', '%' . $search . '%');
+                });
+            });
+        }
+
         $riwayat = $query->orderBy('tanggal', 'desc')
-            ->paginate(20);
-        
+            ->paginate(20)
+            ->appends($request->query()); // ← agar pagination bawa semua filter
+
         $daftarBulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -301,13 +330,66 @@ class AktivitasController extends Controller
         ];
         $daftarTahun = range(date('Y') - 1, date('Y'));
         $departemenList = Departemen::orderBy('nama')->get();
-        
+
         $statusList = [
             'belum' => 'Belum Mulai',
             'progress' => 'On Progress',
             'selesai' => 'Selesai'
         ];
-        
-        return view('riwayat_semua', compact('riwayat', 'bulan', 'tahun', 'daftarBulan', 'daftarTahun', 'userId', 'departemenId', 'departemenList', 'status', 'jenis', 'statusList', 'userList'));
+
+        return view('riwayat_semua', compact(
+            'riwayat', 'bulan', 'tahun', 'daftarBulan', 'daftarTahun',
+            'userId', 'departemenId', 'departemenList', 'status', 'jenis',
+            'statusList', 'userList', 'search'
+        ));
+    }
+
+        /**
+     * Export riwayat bawahan (atasan) ke Excel
+     */
+    public function exportRiwayatBawahan(Request $request)
+    {
+        $atasan = Auth::user();
+
+        $filters = [
+            'departemen_id' => $atasan->departemen_id,
+            'atasan_id'     => $atasan->id,
+            'bulan'         => (int) $request->get('bulan', date('m')),
+            'tahun'         => (int) $request->get('tahun', date('Y')),
+            'user_id'       => $request->get('user_id', ''),
+            'status'        => $request->get('status', ''),
+            'jenis'         => $request->get('jenis', ''),
+            'search'        => $request->get('search', ''),
+        ];
+
+        $namaFile = 'riwayat_bawahan_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\RiwayatBawahanExport($filters),
+            $namaFile
+        );
+    }
+
+    /**
+     * Export riwayat semua (admin) ke Excel
+     */
+    public function exportRiwayatSemua(Request $request)
+    {
+        $filters = [
+            'bulan'         => (int) $request->get('bulan', date('m')),
+            'tahun'         => (int) $request->get('tahun', date('Y')),
+            'user_id'       => $request->get('user_id', ''),
+            'departemen_id' => $request->get('departemen_id', ''),
+            'status'        => $request->get('status', ''),
+            'jenis'         => $request->get('jenis', ''),
+            'search'        => $request->get('search', ''),
+        ];
+
+        $namaFile = 'riwayat_semua_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\RiwayatSemuaExport($filters),
+            $namaFile
+        );
     }
 }

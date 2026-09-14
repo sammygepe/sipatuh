@@ -12,7 +12,7 @@
 
                 <!-- FILTER FORM -->
                 <form method="GET" action="{{ route('riwayat.bawahan') }}" class="mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
                         {{-- Bulan --}}
                         <div>
                             <label class="block text-sm font-medium mb-1">Bulan</label>
@@ -24,7 +24,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         {{-- Tahun --}}
                         <div>
                             <label class="block text-sm font-medium mb-1">Tahun</label>
@@ -36,8 +36,8 @@
                                 @endforeach
                             </select>
                         </div>
-                        
-                        {{-- Pilih Bawahan (DROPDOWN) --}}
+
+                        {{-- Pilih Bawahan --}}
                         <div>
                             <label class="block text-sm font-medium mb-1">Pilih Bawahan</label>
                             <select name="user_id" class="w-full border-gray-300 rounded-md shadow-sm">
@@ -49,7 +49,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         {{-- Filter Status --}}
                         <div>
                             <label class="block text-sm font-medium mb-1">Status</label>
@@ -62,7 +62,15 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
+                        {{-- ← TAMBAHAN: Cari Nama Rutin / Proyek --}}
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Cari Nama</label>
+                            <input type="text" name="search" value="{{ $search ?? '' }}"
+                                   placeholder="Nama rutin / proyek..."
+                                   class="w-full border-gray-300 rounded-md shadow-sm">
+                        </div>
+
                         {{-- Tombol --}}
                         <div class="flex items-end gap-2">
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
@@ -71,7 +79,11 @@
                             <a href="{{ route('riwayat.bawahan') }}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
                                 ↻ Reset
                             </a>
-                        </div>
+                            <a href="{{ route('riwayat.bawahan.export', request()->query()) }}"
+                               class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                                📥 Export
+                            </a>
+                        </div>                        
                     </div>
                 </form>
 

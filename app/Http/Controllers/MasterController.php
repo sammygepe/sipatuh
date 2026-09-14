@@ -13,32 +13,167 @@ class MasterController extends Controller
 {
     /**
      * Menampilkan daftar semua master aktivitas (rutin & proyek)
+     * dengan tab, filter, dan pagination.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        
+
+        // Tab aktif: default 'rutin'
+        $tab = $request->get('tab', 'rutin');
+
+        // ============ DAFTAR USER UNTUK DROPDOWN ============
         if ($user->is_admin) {
-            $rutin = MasterAktivitasRutin::with(['departemen', 'user'])
-                ->orderBy('nama_aktivitas')
-                ->get();
-            $proyek = MasterProyek::with(['departemen', 'user'])
-                ->orderBy('nama_proyek')
-                ->get();
+            $userList = \App\Models\User::orderBy('name')->get();
         } else {
-            $rutin = MasterAktivitasRutin::where('departemen_id', $user->departemen_id)
-                ->with(['departemen', 'user'])
-                ->orderBy('nama_aktivitas')
-                ->get();
-            $proyek = MasterProyek::where('departemen_id', $user->departemen_id)
-                ->with(['departemen', 'user'])
-                ->orderBy('nama_proyek')
-                ->get();
+            $userList = \App\Models\User::where('departemen_id', $user->departemen_id)
+                ->orderBy('name')->get();
         }
-        
+
+        // ============ FILTER RUTIN ============
+        $searchRutin  = $request->get('search_rutin', '');
+        $periode      = $request->get('periode', '');
+        $statusRutin  = $request->get('status_rutin', '');
+        $userRutin    = $request->get('user_rutin', '');
+        $departemenId = $request->get('departemen_id', '');
+
+        $queryRutin = MasterAktivitasRutin::with(['departemen', 'user']);
+
+        if (!$user->is_admin) {
+            $queryRutin->where('departemen_id', $user->departemen_id);
+        } elseif (!empty($departemenId)) {
+            $queryRutin->where('departemen_id', $departemenId);
+        }
+
+        if (!empty($searchRutin)) {
+            $queryRutin->where('nama_aktivitas', 'like', '%' . $searchRutin . '%');
+        }
+        if (!empty($periode)) {
+            $queryRutin->where('periode', $periode);
+        }
+        if (!empty($statusRutin)) {
+            $queryRutin->where('status', $statusRutin);
+        }
+        if (!empty($userRutin)) {
+            $queryRutin->where('user_id', $userRutin);
+        }
+
+        $rutin = $queryRutin->orderBy('nama_aktivitas')
+            ->paginate(15, ['*'], 'page_rutin')
+            ->appends($request->query());
+
+        // ============ FILTER PROYEK ============
+        $searchProyek      = $request->get('search_proyek', '');
+        $statusProyek      = $request->get('status_proyek', '');
+        $statusProyekAkhir = $request->get('status_proyek_akhir', '');
+        $userProyek        = $request->get('user_proyek', '');
+
+        $queryProyek = MasterProyek::with(['departemen', 'user']);
+
+        if (!$user->is_admin) {
+            $queryProyek->where('departemen_id', $user->departemen_id);
+        } elseif (!empty($departemenId)) {
+            $queryProyek->where('departemen_id', $departemenId);
+        }
+
+        if (!empty($searchProyek)) {
+            $queryProyek->where('nama_proyek', 'like', '%' . $searchProyek . '%');
+        }
+        if (!empty($statusProyek)) {
+            $queryProyek->where('status', $statusProyek);
+        }
+        if (!empty($userProyek)) {
+            $queryProyek->where('user_id', $userProyek);
+        }
+
+        // Filter Status Proyek Terakhir
+        if (!empty($statusProyekAkhir)) {
+            $queryProyek->whereIn('id', function ($sub) use ($statusProyekAkhir) {
+                $sub->select('proyek_id')
+                    ->from('log_aktivitas_harian')
+                    ->whereIn('id', function ($sub2) {
+                        $sub2->selectRaw('MAX(id)')
+                            ->from('log_aktivitas_harian')
+                            ->whereNotNull('proyek_id')
+                            ->groupBy('proyek_id');
+                    })
+                    ->where('status', $statusProyekAkhir);
+            });
+        }
+
+        $proyek = $queryProyek->orderBy('nama_proyek')
+            ->paginate(15, ['*'], 'page_proyek')
+            ->appends($request->query());
+
+        // Log terakhir per proyek
+        $proyekIds = $proyek->pluck('id');
+        $logTerakhir = \App\Models\LogAktivitasHarian::whereIn('proyek_id', $proyekIds)
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->groupBy('proyek_id')
+            ->map(fn($logs) => $logs->first());
+
         $departemenList = Departemen::orderBy('nama')->get();
-        
-        return view('master.index', compact('rutin', 'proyek', 'departemenList'));
+
+        return view('master.index', compact(
+            'rutin', 'proyek', 'departemenList', 'logTerakhir', 'userList',
+            'tab',
+            'searchRutin', 'periode', 'statusRutin', 'userRutin',
+            'searchProyek', 'statusProyek', 'statusProyekAkhir', 'userProyek',
+            'departemenId'
+        ));
+    }
+
+    /**
+     * Export data master rutin ke Excel (mengikuti filter aktif)
+     */
+    public function exportRutin(Request $request)
+    {
+        $user = Auth::user();
+
+        // Ambil filter dari request
+        $filters = [
+            'departemen_id' => $user->is_admin
+                ? $request->get('departemen_id', '')
+                : $user->departemen_id,
+            'search_rutin'  => $request->get('search_rutin', ''),
+            'periode'       => $request->get('periode', ''),
+            'status_rutin'  => $request->get('status_rutin', ''),
+            'user_rutin'    => $request->get('user_rutin', ''),
+        ];
+
+        $namaFile = 'master_rutin_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\MasterRutinExport($filters),
+            $namaFile
+        );
+    }
+
+    /**
+     * Export data master proyek ke Excel (mengikuti filter aktif)
+     */
+    public function exportProyek(Request $request)
+    {
+        $user = Auth::user();
+
+        $filters = [
+            'departemen_id'      => $user->is_admin
+                ? $request->get('departemen_id', '')
+                : $user->departemen_id,
+            'search_proyek'      => $request->get('search_proyek', ''),
+            'status_proyek'      => $request->get('status_proyek', ''),
+            'status_proyek_akhir'=> $request->get('status_proyek_akhir', ''),
+            'user_proyek'        => $request->get('user_proyek', ''),
+        ];
+
+        $namaFile = 'master_proyek_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\MasterProyekExport($filters),
+            $namaFile
+        );
     }
     
     /**

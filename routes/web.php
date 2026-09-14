@@ -25,6 +25,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Admin & Atasan bisa lihat & edit master
     Route::get('/master/aktivitas', [MasterController::class, 'index'])->name('master.aktivitas');
+    Route::get('/master/aktivitas/export-rutin', [MasterController::class, 'exportRutin'])->name('master.export.rutin');
+    Route::get('/master/aktivitas/export-proyek', [MasterController::class, 'exportProyek'])->name('master.export.proyek');
     Route::get('/master/aktivitas/edit/{id}/{jenis}', [MasterController::class, 'edit'])->name('master.edit');
     Route::put('/master/aktivitas/update/{id}/{jenis}', [MasterController::class, 'update'])->name('master.update');
     Route::delete('/master/aktivitas/delete/{id}/{jenis}', [MasterController::class, 'delete'])->name('master.delete');
@@ -41,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kpi/laporan-bawahan', [KPIController::class, 'laporanBawahan'])->name('kpi.laporan.bawahan');
         Route::get('/kpi/bawahan/export', [KPIController::class, 'exportBawahan'])->name('kpi.export.bawahan');
         Route::get('/riwayat/bawahan', [AktivitasController::class, 'riwayatBawahan'])->name('riwayat.bawahan');
+        Route::get('/riwayat/bawahan/export', [AktivitasController::class, 'exportRiwayatBawahan'])->name('riwayat.bawahan.export');
     });
 
     // Route untuk admin
@@ -61,7 +64,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kpi-semua/export', [KPIController::class, 'exportSemua'])->name('kpi.export');
         // Route riwayat untuk ADMIN (hanya di sini)
         Route::get('/riwayat/semua', [AktivitasController::class, 'riwayatSemua'])->name('riwayat.semua');
+        Route::get('/riwayat/semua/export', [AktivitasController::class, 'exportRiwayatSemua'])->name('riwayat.semua.export');
     });
+
 });
 
 // Auth routes (Breeze)
